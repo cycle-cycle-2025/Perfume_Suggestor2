@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Build Your Blend – Suggestions</title>
+  
+  <!-- Load Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* Custom configuration for Tailwind colors and font variables (LIGHT THEME) */
+    :root {
+      --color-brand-start: #1D4ED8; /* Deep Blue (for contrast) */
+      --color-brand-end: #059669;     /* Deep Green (for contrast) */
+      --color-bg-light: #f5f7fa; /* Near-white background */
+      --color-card-light: #ffffff; /* Pure white card background */
+      --color-border-light: #cbd5e1; /* Light gray border */
+      --fill-color-a: #67e8f9;
+      --fill-color-b: #38bdf8;
+    }
+    
+    /* Global styles and Inter font setup */
+    body {
+      font-family: 'Inter', 'system-ui', 'Segoe UI', 'Arial', 'sans-serif';
+      background-color: var(--color-bg-light);
+    }
+    
+    /* bottle-specific CSS (retaining crucial positioning and transition for JS) */
+    .bottle-wrap {
+      display: flex;
+      align-items: flex-end; 
+      justify-content: center;
+      margin-top: 1.5rem; 
+      padding-bottom: 20px; 
+    }
+    .bottle {
+      width: 140px;
+      /* Set the height to match the SVG's coordinate system (220 units) */
+      height: 220px; 
+      position: relative;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,.1)); 
+    }
+    
+    /* Define the shape of the liquid container */
+    .bottle-clip {
+      /* KEY FIX: Set dimensions to match the liquid area of the SVG (from Y=40 to Y=200) */
+      position: absolute;
+      top: 18.18%; /* 40 / 220 = 18.18% */
+      left: 0;
+      width: 100%;
+      height: 72.72%; /* 160 / 220 = 72.72% */
+      
+      /* Apply the clip path defined in the SVG */
+      clip-path: url(#bottle-body-clip);
+      z-index: 5; /* Liquid layer */
+      
+      /* KEY FIX 2: Ensure the bottle clip container is visually opaque or invisible by default */
+      background: transparent; 
+    }
+    
+    .fill {
+      position: absolute;
+      /* Fill must cover the entire .bottle-clip container */
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      height: 0;
+      width: 100%;
+      
+      /* New Vibrant Fill Gradient */
+      background: linear-gradient(180deg, var(--fill-color-a), var(--fill-color-b)); 
+      
+      /* IMPROVED ANIMATION: Longer duration (1.5s) and a spring/overshoot effect */
+      transition: height 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+    
+    /* SVG Outline */
+    .bottle svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10; /* Outline layer on top */
+      stroke: #334155; 
+      stroke-width: 2;
+      /* Ensure the outline is not filled */
+      fill: none; 
+    }
+
+    /* Custom scrollbar for better light mode look */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-bg-light);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+  </style>
+  
+  <!-- Tailwind configuration to use custom variables --><script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'brand-start': 'var(--color-brand-start)',
+                    'brand-end': 'var(--color-brand-end)',
+                    'card-bg': 'var(--color-card-light)',
+                    'border-light': 'var(--color-border-light)',
+                    'text-primary': '#1f2937', /* Dark text */
+                    'text-muted': '#64748b', /* Muted gray text */
+                },
+                fontFamily: {
+                    sans: ['Inter', 'system-ui', 'Segoe UI', 'Arial', 'sans-serif'],
+                },
+            }
+        }
+    }
+  </script>
+</head>
+<body class="min-h-screen antialiased text-text-primary">
+  <!-- Main Container: max-w and center alignment --><div class="max-w-4xl mx-auto p-4 md:p-8 mt-10">
+    
+    <!-- Card 1: Input and Bottle Section --><div class="bg-card-light border border-border-light rounded-xl p-6 shadow-2xl transition duration-300 hover:shadow-brand-end/10">
+      
+      <!-- Header --><h1 class="text-3xl font-extrabold mb-2 tracking-tight text-gray-900">Find Your Blend</h1>
+      <div class="text-lg text-text-muted mb-6">
+        Tell us up to three perfumes you love. We'll infer your vibe, then recommend a perfect blend (max 3) or the best single pick from our collection.
+      </div>
+      
+      <!-- Input Row (ID's p1, p2, p3 preserved) --><div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input id="p1" class="w-full p-4 rounded-xl border border-border-light bg-gray-50 text-text-primary placeholder-text-muted focus:border-brand-end focus:ring-1 focus:ring-brand-end transition duration-200 shadow-inner" placeholder="Favorite perfume #1"/>
+        <input id="p2" class="w-full p-4 rounded-xl border border-border-light bg-gray-50 text-text-primary placeholder-text-muted focus:border-brand-end focus:ring-1 focus:ring-brand-end transition duration-200 shadow-inner" placeholder="Favorite perfume #2 (optional)"/>
+        <input id="p3" class="w-full p-4 rounded-xl border border-border-light bg-gray-50 text-text-primary placeholder-text-muted focus:border-brand-end focus:ring-1 focus:ring-brand-end transition duration-200 shadow-inner" placeholder="Favorite perfume #3 (optional)"/>
+      </div>
+      
+      <!-- Button (ID analyze preserved) and Status (ID status preserved) --><div class="flex flex-col sm:flex-row gap-4 items-center mt-6">
+        <button id="analyze" class="w-full sm:w-auto px-8 py-3 rounded-xl text-white font-bold text-lg shadow-lg hover:shadow-xl transition duration-300 
+                                      bg-gradient-to-r from-brand-start to-brand-end hover:from-brand-end hover:to-brand-start disabled:opacity-50 disabled:cursor-not-allowed">
+          Analyze My Scent
+        </button>
+        <span id="status" class="text-text-muted text-sm font-medium">Ready</span>
+      </div>
+
+      <!-- Bottle Visualization --><div class="bottle-wrap">
+        <div class="bottle">
+          
+          <!-- Liquid container is now separate, uses clip-path -->
+          <div class="bottle-clip">
+            <!-- Fill element (ID fill preserved) -->
+            <div id="fill" class="fill"></div>
+          </div>
+          
+          <!-- SVG: Defines the visual outline AND the clip path -->
+          <svg viewBox="0 0 160 220" class="absolute top-0 left-0">
+            <!-- Hidden definition for the clip path, only for the bottle's main body -->
+            <defs>
+              <!-- The clip path is defined relative to the SVG's 160x220 space -->
+              <clipPath id="bottle-body-clip">
+                <path d="M40 40 H120 C128 40 135 47 135 55 V185 C135 195 125 200 120 200 H40 C35 200 25 195 25 185 V55 C25 47 32 40 40 40 Z"/>
+              </clipPath>
+            </defs>
+            
+            <!-- Visible Outline (Cap and Body) -->
+            <path d="M55 10 H105 V30 C105 40 95 40 95 40 H65 C65 40 55 40 55 30 V10 Z M40 40 H120 C128 40 135 47 135 55 V185 C135 195 125 200 120 200 H40 C35 200 25 195 25 185 V55 C25 47 32 40 40 40 Z" 
+                  stroke="#334155" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+      </div>
+      <div class="text-sm text-text-muted text-center mt-3">Bottle fills as your blend forms</div>
+    </div>
+
+    <!-- Grid 2: Preference and Recommendation Sections --><div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+      
+      <!-- Preference Card --><div class="bg-card-light border border-border-light rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-semibold text-brand-end mb-2">Your Preference Profile</h3>
+        <!-- Preference Text (ID pref preserved) --><div id="pref" class="text-text-primary text-lg font-medium">—</div>
+        <!-- Preference Tags Container (ID pref-tags preserved) --><div id="pref-tags" class="mt-3 flex flex-wrap gap-2">
+          <span class="inline-block border border-border-light rounded-full px-3 py-1 text-xs text-text-muted bg-gray-100 font-medium">Example Tag</span>
+        </div>
+      </div>
+      
+      <!-- Recommendation Card --><div class="bg-card-light border border-border-light rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-semibold text-brand-start mb-2">Scent Recommendation</h3>
+        <!-- Recommendation Text (ID rec preserved) --><div id="rec" class="text-text-primary text-lg font-medium">—</div>
+        <!-- Blend Details/JSON output (ID blend preserved) --><div id="blend" class="font-mono text-sm text-text-muted mt-3 p-3 bg-gray-50 rounded-lg overflow-x-auto whitespace-pre-wrap border border-border-light"></div>
+      </div>
+    </div>
+
+    <!-- Debug JSON Card --><div class="bg-card-light border border-border-light rounded-xl p-6 shadow-lg mt-4 mb-10">
+      <h3 class="text-xl font-semibold text-text-muted mb-2">Debug JSON Output</h3>
+      <!-- Debug JSON Output Area (ID json preserved) --><pre id="json" class="font-mono text-xs text-text-muted mt-2 p-3 bg-gray-50 rounded-lg overflow-x-auto border border-border-light">
+        —
+      </pre>
+    </div>
+  </div>
+
+  <!-- Script reference preserved --><script src="./app.js"></script>
+</body>
+</html>
